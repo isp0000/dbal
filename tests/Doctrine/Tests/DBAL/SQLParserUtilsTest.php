@@ -8,6 +8,7 @@ use Doctrine\DBAL\SQLParserUtils;
 /**
  * @group DBAL-78
  * @group DDC-1372
+ * @group DBAL-1205
  */
 class SQLParserUtilsTest extends \Doctrine\Tests\DbalTestCase
 {
@@ -17,6 +18,8 @@ class SQLParserUtilsTest extends \Doctrine\Tests\DbalTestCase
             // none
             array('SELECT * FROM Foo', true, array()),
             array('SELECT * FROM Foo', false, array()),
+            array('select \'quoted1 \'\' :not_a_param1 quoted2 "\'\':not_a_param2\'\'" \'\'\' foo from rdb$database', false, array()), // Ticket DBAL-1205
+
 
             // Positionals
             array('SELECT ?', true, array(7)),
@@ -53,6 +56,7 @@ class SQLParserUtilsTest extends \Doctrine\Tests\DbalTestCase
             array('SELECT foo::date as date FROM Foo WHERE bar > :start_date AND baz > :start_date', false, array(46 => 'start_date', 68 =>  'start_date')), // Ticket GH-259
             array('SELECT `d.ns:col_name` FROM my_table d WHERE `d.date` >= :param1', false, array(57 => 'param1')), // Ticket DBAL-552
             array('SELECT [d.ns:col_name] FROM my_table d WHERE [d.date] >= :param1', false, array(57 => 'param1')), // Ticket DBAL-552
+            array("SELECT 'O''hara' as test from sometable where somecolumn = :myPlaceholder AND otherColumn not in ( 'Test')", false, array(59 => 'myPlaceholder')), // Ticket DBAL-1205
         );
     }
 
